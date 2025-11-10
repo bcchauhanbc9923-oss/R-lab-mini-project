@@ -1,0 +1,79 @@
+# Sales Analysis Dashboard in R
+
+# 1. Load required libraries
+install.packages("tidyverse")
+install.packages("lubridate")
+install.packages("ggplot2")
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+
+# 2. Read the CSV file
+sales <- read.csv("Sales_Analysis.csv")
+sales$Date <- as.Date(sales$Date)
+
+# 3. Data Overview
+head(sales)
+summary(sales)
+total_sales <- sum(sales$TotalSales)
+cat("Total Sales Revenue: ", total_sales, "\n")
+total_quantity <- sum(sales$Quantity)
+cat("Total Quantity Sold: ", total_quantity, "\n")
+customer_summary <- sales %>%
+  group_by(Customer) %>%
+  summarise(TotalOrders = n(),
+            TotalSales = sum(TotalSales),
+            TotalQuantity = sum(Quantity))
+print(customer_summary)
+
+# 4. Sales Trend over Time
+sales_trend <- sales %>%
+  group_by(Date) %>%
+  summarise(DailySales = sum(TotalSales))
+ggplot(sales_trend, aes(x=Date, y=DailySales)) +
+  geom_line(color="blue", linewidth=1) +
+  geom_area(fill="lightblue", alpha=0.4) +
+  ggtitle("Daily Sales Trend") +
+  xlab("Date") + ylab("Sales Revenue") +
+  theme_minimal()
+
+# 5. Sales by Product (Bar Plot)
+sales_by_product <- sales %>%
+  group_by(Product) %>%
+  summarise(TotalSales = sum(TotalSales))
+ggplot(sales_by_product, aes(x=Product, y=TotalSales, fill=Product)) +
+  geom_bar(stat="identity") +
+  ggtitle("Total Sales by Product") +
+  xlab("Product") + ylab("Sales Revenue") +
+  theme_minimal()
+
+# 6. Sales by Region (Bar Plot)
+sales_by_region <- sales %>%
+  group_by(Region) %>%
+  summarise(TotalSales = sum(TotalSales))
+ggplot(sales_by_region, aes(x=Region, y=TotalSales, fill=Region)) +
+  geom_bar(stat="identity") +
+  ggtitle("Total Sales by Region") +
+  xlab("Region") + ylab("Sales Revenue") +
+  theme_minimal()
+
+# 8. Customer Segment Distribution (Pie Chart)
+customer_dist <- sales %>%
+  group_by(Customer) %>%
+  summarise(TotalSales = sum(TotalSales))
+ggplot(customer_dist, aes(x="", y=TotalSales, fill=Customer)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  ggtitle("Sales Distribution by Customer") +
+  theme_void()
+
+# 9. Total Quantity of  Product sold (Bar Plot)
+quantity_by_product <- sales %>%
+  group_by(Product) %>%
+  summarise(TotalQuantity = sum(Quantity))
+ggplot(quantity_by_product, aes(x=Product, y=TotalQuantity, fill=Product)) +
+  geom_bar(stat="identity") +
+  ggtitle("Total Quantity of Product sold") +
+  xlab("Product") + ylab("Quantity") +
+  theme_minimal()
+
